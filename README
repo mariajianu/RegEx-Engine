@@ -1,0 +1,79 @@
+=================
+JIANU Maria 331CB
+	Tema LFA
+=================
+
+	Punctaj din teste: 1.04
+
+	1. Parsarea
+
+	Am parsat expresiile regulate (sirul de caractere) pe care 
+apoi l-am transformat intr-un obiect de tip RegEx. Pentru
+asta am folosit functia parseRegEx() pe care o voi explica 
+in continuare.
+
+	parseRegEx():
+
+- verific daca string-ul este unul dintr cazurile de baza: sirul
+vid sau un simbol.
+- verific daca stringul este unul din cazurile usoare: "simbol 
+operatie simbol", unde "operatie" poate fi concatenare sau 
+alternare. Tot un caz usor este si "simbol operatie", unde 
+operatie poate fi: star, maybe, plus, range.
+- pentru cazurile de mai sus, se va intra in recursivitate in
+cazul in care operanzii nu sunt simboluri ci sunt alte expresii.
+- tratez separat cazul range si cazul in care avem paranteze, 
+mai exact mai mult de o pereche de paranteze
+
+	2. Transformarea RegEx - RegularExpression
+
+	O fac in functia convertRegEx().
+	Ca la parsare ma ocup intai de cazurile de baza => empty
+string si symbol simple, apoi de cazurile simbol concatenare
+simbol, simbol alternare simbol.
+	Pentru celelalte cazuri se intra in recursivitate pe cele
+doua ramuri pana cand se ajunge la un tip simplu pe care functia
+il intoarce.
+
+	3. Transformarea RegularExpression - NFA
+	
+	Pentru acest pas am copiat codul scris de mine in laboratorul
+3, mai exact functia re_to_nfa() => care se foloseste de mai multe
+functii auxiliare (union, intersection, rename_states, new_states)
+	Pentru un NFA avem doar 6 tipuri: Empty_string,
+empty_set, symbol, concatanation, alternation si star.
+	
+	4. Transformarea NFA - DFA
+
+OBS:	 Transformarea pe care am implementat-o eu este
+corecta, dar nu completa. Problema este ca din starea 
+initiala a NFA-ului poate rezulta o singura stare
+initiala a DFA-ului (folosind inchiderea epsilon), iar
+din aceasta prima stare poate rezulta doar inca o singura 
+stare. 
+=> "arborele de adancime" al DFA-ului meu poate avea doar 
+2 nivele
+	
+	nfa_to_dfa():
+
+- ma ocup de inchiderea epsilon a starii initiale si verific
+daca nu cumva starea intiala este si finala
+- pentru fiecare litera din alfabet, pentru fiecare tranzitie 
+din delta iau fiecare stare din starile initiale si 
+construiesc noile tranzitii ale DFA-ului
+- din pasul anterior rezulta o lista de liste ce reprezinta
+starile care reies din prima stare 
+- pentru fiecare element din lista de liste se reia pasul 2
+- se apeleaza constructorul DFA-ului cu informatiile de 
+pana acum
+
+	5. Verfic daca un cuvant apartine limbajului
+
+- tratez separat cazul simplu pentru expresia "."
+- pentru fiecare litera din cuvant merg prin toate tranzitiile
+DFA-ului si vad daca exista tranzitie pentru acea litera din
+starea in care ne aflam
+- daca nu exista tranzitie, stare curenta ia valoare -3 care
+este evident o stare invalida si se va printa FALSE
+- daca tranzitia exista, starea curenta isi schimba valoare 
+si procesul este reluat
